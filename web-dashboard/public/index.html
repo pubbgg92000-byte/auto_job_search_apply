@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Career-Ops Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside>
+        <div class="brand">
+          <span>CO</span>
+          <div>
+            <h1>Career-Ops</h1>
+            <p>Local job operations</p>
+          </div>
+        </div>
+        <nav aria-label="Dashboard">
+          <button class="nav active" data-view="resume-flow">Career Flow</button>
+          <button class="nav" data-view="command">Dashboard</button>
+          <button class="nav" data-view="pipeline">Applications</button>
+          <button class="nav" data-view="reports">Reports</button>
+          <button class="nav" data-view="setup">Settings</button>
+        </nav>
+        <div class="guardrail">
+          <b>Human gate</b>
+            <p>Tailor and prepare here. Every live application submission needs approval.</p>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <p class="eyebrow">Career intelligence dashboard</p>
+            <h2 id="view-title">Command Center</h2>
+          </div>
+          <div class="toolbar">
+            <button id="refresh" class="button">Refresh</button>
+            <a class="button primary" href="/api/dashboard" target="_blank" rel="noreferrer">Data JSON</a>
+          </div>
+        </header>
+        <section id="command" class="view">
+          <article class="flow-banner">
+            <div>
+              <p class="eyebrow">Guided career workflow</p>
+              <h3>Resume intelligence to application tracking</h3>
+              <p>Begin with the resume lab, review ATS signals and rewrites, then move selected jobs into the Career-Ops pipeline.</p>
+            </div>
+            <div class="row-actions">
+              <button class="button primary" data-go-view="resume-flow">Start resume workflow</button>
+              <button class="button" data-go-view="pipeline">Open applications</button>
+            </div>
+          </article>
+          <div class="metrics" id="metrics"></div>
+          <div class="split">
+            <article class="panel pipeline-peek">
+              <div class="panel-head">
+                <div>
+                  <h3>Priority Pipeline</h3>
+                  <p>Tracked applications sorted by fit score and next state.</p>
+                </div>
+              </div>
+              <div id="priority-apps"></div>
+            </article>
+            <article class="panel setup-card">
+              <div class="panel-head">
+                <div>
+                  <h3>Readiness</h3>
+                  <p>The live dashboard uses your local Career-Ops files.</p>
+                </div>
+              </div>
+              <div id="setup-peek" class="checklist"></div>
+            </article>
+          </div>
+          <div class="split lower">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>URL Inbox</h3>
+                  <p>Add job URLs for the existing Career-Ops pipeline mode.</p>
+                </div>
+              </div>
+              <form id="inbox-form" class="inbox-form">
+                <input name="url" required placeholder="https://company.example/jobs/role" />
+                <input name="company" placeholder="Company" />
+                <input name="role" placeholder="Role" />
+                <button class="button primary">Add</button>
+              </form>
+              <div id="pending-peek"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Batch Operations</h3>
+                  <p>Recent worker state from <code>batch/batch-state.tsv</code>.</p>
+                </div>
+              </div>
+              <div id="batch"></div>
+            </article>
+          </div>
+        </section>
+        <section id="resume-flow" class="view active">
+          <article class="flow-deck panel">
+            <div class="deck-head">
+              <div>
+                <p class="eyebrow">Single-window career workflow</p>
+                <h3>Resume to approved applications</h3>
+              </div>
+              <div class="deck-progress" aria-label="Workflow steps">
+                <button class="deck-dot active" data-slide-jump="0">1</button>
+                <button class="deck-dot" data-slide-jump="1">2</button>
+                <button class="deck-dot" data-slide-jump="2">3</button>
+                <button class="deck-dot" data-slide-jump="3">4</button>
+                <button class="deck-dot" data-slide-jump="4">5</button>
+              </div>
+            </div>
+            <div class="deck-window">
+              <div class="deck-track" id="career-track">
+                <article class="career-slide" data-slide="0">
+                  <div class="slide-copy">
+                    <span class="slide-number">Slide 1</span>
+                    <h4>Intake</h4>
+                    <p>Start with the resume, role targets, job descriptions, and location preferences.</p>
+                  </div>
+                  <form id="career-intake" class="slide-grid">
+                    <label class="field resume-source">
+                      <span>Resume file</span>
+                      <input id="resume-file" type="file" accept=".md,.txt,.pdf,.docx" />
+                      <small id="resume-file-note">Upload TXT, Markdown, PDF, or DOCX to parse resume evidence into the intake.</small>
+                    </label>
+                    <label class="field full">
+                      <span>Resume text</span>
+                      <textarea id="resume-text" rows="10" placeholder="Paste the resume text or Markdown here."></textarea>
+                    </label>
+                    <label class="field">
+                      <span>Target job roles</span>
+                      <textarea id="target-roles" rows="4" required placeholder="Frontend Engineer&#10;AI Automation Engineer"></textarea>
+                    </label>
+                    <label class="field">
+                      <span>Job descriptions or keywords</span>
+                      <textarea id="jd-context" rows="4" required placeholder="Paste job descriptions, desired skills, or company requirements."></textarea>
+                    </label>
+                    <label class="field">
+                      <span>Locations</span>
+                      <input id="location-preferences" required placeholder="India remote, Bengaluru, global remote" />
+                    </label>
+                    <label class="field">
+                      <span>Preferences</span>
+                      <input id="work-preferences" required placeholder="Remote, salary range, industries, deal-breakers" />
+                    </label>
+                    <div id="resume-prefill" class="prefill-note full">Resume upload can fill roles, location, job context, and preferences when those signals appear in the resume.</div>
+                  </form>
+                </article>
+                <article class="career-slide" data-slide="1">
+                  <div class="slide-copy">
+                    <span class="slide-number">Slide 2</span>
+                    <h4>ATS review</h4>
+                    <p>Review scan signals, approve AI-assisted resume improvements, and keep claims grounded in your resume.</p>
+                  </div>
+                  <div class="slide-grid review-grid">
+                    <div id="ats-scoreboard" class="scoreboard full"></div>
+                    <article class="review-surface">
+                      <h5>Improvement plan</h5>
+                      <div id="improvement-plan" class="checklist"></div>
+                    </article>
+                    <article class="review-surface">
+                      <h5>AI change gate</h5>
+                      <label class="choice"><input id="ai-change-approval" type="checkbox" /> Use assisted changes for the editable resume draft.</label>
+                      <button id="build-resume-draft" type="button" class="button primary">Build improved draft</button>
+                      <p id="draft-status">Approve the change gate before moving forward.</p>
+                    </article>
+                  </div>
+                </article>
+                <article class="career-slide" data-slide="2">
+                  <div class="slide-copy">
+                    <span class="slide-number">Slide 3</span>
+                    <h4>Final resume</h4>
+                    <p>Edit the final draft in place, inspect its score lift, and download the resume artifact.</p>
+                  </div>
+                  <div class="slide-grid editor-grid">
+                    <label class="field full resume-editor">
+                      <span>Editable resume draft</span>
+                      <textarea id="final-resume" rows="22" placeholder="Your improved resume draft appears here."></textarea>
+                    </label>
+                    <aside class="review-surface final-panel">
+                      <h5>Final scores</h5>
+                      <div id="final-scoreboard" class="mini-scoreboard"></div>
+                      <div class="row-actions">
+                        <button id="download-resume" type="button" class="button primary">Download resume</button>
+                        <a class="button" href="http://localhost:4173/phase2-ats-prototype/" target="_blank" rel="noreferrer">Resume lab</a>
+                      </div>
+                    </aside>
+                  </div>
+                </article>
+                <article class="career-slide" data-slide="3">
+                  <div class="slide-copy">
+                    <span class="slide-number">Slide 4</span>
+                    <h4>Jobs and application queue</h4>
+                    <p>Add roles, URLs, and requirements. Career Ops can evaluate and tailor each queued job; live submission stays approval-gated.</p>
+                  </div>
+                  <div class="slide-grid jobs-grid">
+                    <form id="guided-job-form" class="job-form">
+                      <input name="company" required placeholder="Company" />
+                      <input name="role" required placeholder="Role" />
+                      <input name="url" required placeholder="https://company.example/jobs/role" />
+                      <textarea name="description" rows="4" placeholder="Role requirements or notes"></textarea>
+                      <button class="button" type="submit">Add role</button>
+                    </form>
+                    <article class="review-surface job-queue">
+                      <h5>Approved job queue</h5>
+                      <div id="guided-job-list"></div>
+                      <label class="choice"><input id="queue-approval" type="checkbox" /> I approve adding these job links to the Career Ops pipeline.</label>
+                      <button id="queue-approved-jobs" type="button" class="button primary">Queue approved jobs</button>
+                    </article>
+                  </div>
+                </article>
+                <article class="career-slide" data-slide="4">
+                  <div class="slide-copy">
+                    <span class="slide-number">Slide 5</span>
+                    <h4>Follow-up board</h4>
+                    <p>See queued work, evaluated roles, applied roles, responses, rejections, and the next daily review.</p>
+                  </div>
+                  <div class="slide-grid followup-grid">
+                    <div id="followup-metrics" class="scoreboard full"></div>
+                    <article class="review-surface">
+                      <h5>Pipeline inbox</h5>
+                      <div id="workflow-pending"></div>
+                    </article>
+                    <article class="review-surface">
+                      <h5>Daily review</h5>
+                      <div id="followup-list" class="checklist"></div>
+                      <div class="row-actions">
+                        <button class="button primary" data-go-view="pipeline">Application tracker</button>
+                        <button class="button" data-go-view="reports">Reports</button>
+                      </div>
+                    </article>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <footer class="deck-footer">
+              <button id="career-back" class="button" type="button">Back</button>
+              <p id="career-gate">Complete the intake fields to continue.</p>
+              <button id="career-next" class="button primary" type="button" disabled>Next</button>
+            </footer>
+          </article>
+        </section>
+        <section id="pipeline" class="view">
+          <article class="panel">
+            <div class="panel-head pipeline-tools">
+              <div>
+                <h3>Application Tracker</h3>
+                <p>Status changes update existing tracker rows only.</p>
+              </div>
+              <div class="filters">
+                <input id="search" placeholder="Search company or role" />
+                <select id="status-filter">
+                  <option value="all">All statuses</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Opportunity</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Signals</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="application-table"></tbody>
+              </table>
+            </div>
+          </article>
+          <div class="split lower">
+            <article class="panel">
+              <div class="panel-head"><div><h3>Pending URLs</h3><p>Inbox rows waiting for pipeline processing.</p></div></div>
+              <div id="pending-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><div><h3>Processed URLs</h3><p>Entries already moved through the URL inbox.</p></div></div>
+              <div id="processed-list"></div>
+            </article>
+          </div>
+        </section>
+        <section id="reports" class="view">
+          <div class="split reports-layout">
+            <article class="panel">
+              <div class="panel-head"><div><h3>Report Library</h3><p>Evaluation reports linked from the tracker.</p></div></div>
+              <div id="report-list"></div>
+            </article>
+            <article class="panel report-viewer">
+              <div class="panel-head"><div><h3 id="report-title">Report Preview</h3><p>Markdown stays local.</p></div></div>
+              <pre id="report-content">Select a report to read its evaluation notes.</pre>
+            </article>
+          </div>
+        </section>
+        <section id="setup" class="view">
+          <div class="split">
+            <article class="panel">
+              <div class="panel-head"><div><h3>Project Setup</h3><p>Required files for live job workflows.</p></div></div>
+              <div id="setup-full" class="checklist"></div>
+            </article>
+            <article class="panel instructions">
+              <div class="panel-head"><div><h3>Runbook</h3><p>The dashboard complements the existing agent modes.</p></div></div>
+              <ol>
+                <li>Finish <code>config/profile.yml</code> and <code>portals.yml</code>.</li>
+                <li>Run <code>npm run doctor</code> until setup passes.</li>
+                <li>Add URLs here or ask the agent to scan configured portals.</li>
+                <li>Use the Career-Ops pipeline/evaluation modes to create reports and PDFs.</li>
+                <li>Review the tracker here; submit live applications yourself.</li>
+              </ol>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

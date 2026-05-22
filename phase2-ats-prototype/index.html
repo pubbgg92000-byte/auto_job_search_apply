@@ -1,0 +1,1878 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CoSTAR ATS Intelligence</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #18202f;
+        --muted: #667085;
+        --line: #d8dee8;
+        --panel: #ffffff;
+        --wash: #f5f7fb;
+        --nav: #101828;
+        --green: #087443;
+        --teal: #047481;
+        --amber: #b54708;
+        --red: #b42318;
+        --blue: #175cd3;
+        --violet: #6941c6;
+        --shadow: 0 18px 48px rgba(16, 24, 40, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--wash);
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+      }
+
+      aside {
+        background: var(--nav);
+        color: #eef2f6;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        color: #101828;
+        font-weight: 800;
+        background: linear-gradient(135deg, #7cd4fd, #a6ef67);
+      }
+
+      .brand h1 {
+        font-size: 17px;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .brand span {
+        display: block;
+        color: #98a2b3;
+        font-size: 12px;
+        margin-top: 3px;
+      }
+
+      nav {
+        display: grid;
+        gap: 6px;
+      }
+
+      .nav-button {
+        border: 0;
+        border-radius: 8px;
+        padding: 11px 12px;
+        text-align: left;
+        color: #d0d5dd;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-button.active,
+      .nav-button:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-icon {
+        width: 18px;
+        text-align: center;
+      }
+
+      .mcp-stack {
+        margin-top: auto;
+        display: grid;
+        gap: 10px;
+      }
+
+      .mcp-stack h2 {
+        color: #d0d5dd;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      .mcp-chip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: #d0d5dd;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        padding: 9px 10px;
+        font-size: 12px;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #12b76a;
+      }
+
+      main {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      main > header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: rgba(245, 247, 251, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+        padding: 18px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      main > header h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      main > header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .button {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 8px;
+        min-height: 38px;
+        padding: 0 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 650;
+      }
+
+      .button.primary {
+        color: #ffffff;
+        background: var(--nav);
+        border-color: var(--nav);
+      }
+
+      .content {
+        padding: 24px 28px 40px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        padding: 18px;
+        min-width: 0;
+      }
+
+      .span-3 {
+        grid-column: span 3;
+      }
+
+      .span-4 {
+        grid-column: span 4;
+      }
+
+      .span-5 {
+        grid-column: span 5;
+      }
+
+      .span-6 {
+        grid-column: span 6;
+      }
+
+      .span-7 {
+        grid-column: span 7;
+      }
+
+      .span-8 {
+        grid-column: span 8;
+      }
+
+      .span-12 {
+        grid-column: span 12;
+      }
+
+      .dropzone {
+        min-height: 290px;
+        border: 2px dashed #98a2b3;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 28px;
+        transition: 160ms ease;
+      }
+
+      .dropzone.dragging {
+        border-color: var(--teal);
+        background: #ecfdff;
+      }
+
+      .dropzone strong {
+        display: block;
+        font-size: 19px;
+        margin-bottom: 8px;
+      }
+
+      .dropzone p {
+        color: var(--muted);
+        margin: 0 0 16px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .small {
+        font-size: 12px;
+      }
+
+      .kpi {
+        display: grid;
+        gap: 8px;
+      }
+
+      .kpi label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 750;
+      }
+
+      .kpi strong {
+        font-size: 34px;
+        letter-spacing: 0;
+      }
+
+      .meter {
+        height: 10px;
+        border-radius: 999px;
+        background: #eaecf0;
+        overflow: hidden;
+      }
+
+      .meter > span {
+        display: block;
+        height: 100%;
+        width: var(--value, 0%);
+        background: linear-gradient(90deg, #f79009, #12b76a);
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .section-title h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .tags,
+      .issue-list,
+      .chunk-list,
+      .diff-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        padding: 6px 9px;
+        font-size: 12px;
+      }
+
+      .tag.good {
+        color: var(--green);
+        border-color: #abefc6;
+        background: #ecfdf3;
+      }
+
+      .tag.warn {
+        color: var(--amber);
+        border-color: #fedf89;
+        background: #fffaeb;
+      }
+
+      .tag.bad {
+        color: var(--red);
+        border-color: #fecdca;
+        background: #fef3f2;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 210px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--ink);
+        background: #ffffff;
+        line-height: 1.45;
+      }
+
+      .input-row {
+        display: grid;
+        gap: 8px;
+      }
+
+      .input-row label {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .issue {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 12px;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 11px;
+        background: #fff;
+      }
+
+      .issue b {
+        color: var(--nav);
+      }
+
+      .chunk {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #ffffff;
+      }
+
+      .chunk header {
+        position: static;
+        border: 0;
+        background: transparent;
+        padding: 0 0 8px;
+        display: flex;
+      }
+
+      .chunk p {
+        margin: 0;
+        color: #344054;
+        line-height: 1.45;
+      }
+
+      .diff {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 180px;
+        gap: 12px;
+        align-items: stretch;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #ffffff;
+      }
+
+      .diff-box {
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid #eaecf0;
+        padding: 10px;
+        line-height: 1.45;
+      }
+
+      .diff-box strong {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .evidence {
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+
+      .progress {
+        display: none;
+        gap: 8px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .progress.active {
+        display: flex;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #d0d5dd;
+        border-top-color: var(--teal);
+        animation: spin 900ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .preview {
+        max-height: 410px;
+        overflow: auto;
+        white-space: pre-wrap;
+        line-height: 1.5;
+        color: #344054;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .table th,
+      .table td {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 8px;
+        vertical-align: top;
+        font-size: 13px;
+      }
+
+      .table th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        color: var(--ink);
+        padding: 0 36px 0 12px;
+      }
+
+      .ops-controls,
+      .ops-status,
+      .ops-actions,
+      .agent-strip {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .ops-controls label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .ops-table-wrap {
+        overflow-x: auto;
+      }
+
+      .ops-score {
+        display: grid;
+        gap: 4px;
+        min-width: 96px;
+      }
+
+      .ops-score b {
+        font-size: 18px;
+      }
+
+      .ops-score span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .ops-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .ops-row,
+      .checkpoint,
+      .agent {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .ops-row,
+      .checkpoint {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .ops-row header,
+      .checkpoint header {
+        position: static;
+        top: auto;
+        z-index: auto;
+        border: 0;
+        background: transparent;
+        backdrop-filter: none;
+        padding: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .ops-row h4,
+      .checkpoint h4 {
+        font-size: 14px;
+        margin: 0 0 3px;
+      }
+
+      .ops-row p,
+      .checkpoint p,
+      .agent p {
+        color: var(--muted);
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      .agent-strip {
+        align-items: stretch;
+      }
+
+      .agent {
+        display: grid;
+        flex: 1 1 150px;
+        gap: 8px;
+        min-width: 0;
+        padding: 12px;
+      }
+
+      .agent b {
+        font-size: 13px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: var(--nav);
+        color: white;
+        border-radius: 8px;
+        padding: 12px 14px;
+        box-shadow: var(--shadow);
+        display: none;
+        max-width: 360px;
+        z-index: 4;
+      }
+
+      .toast.active {
+        display: block;
+      }
+
+      @media (max-width: 980px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        aside {
+          position: static;
+        }
+
+        .mcp-stack {
+          display: none;
+        }
+
+        main > header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .span-3,
+        .span-4,
+        .span-5,
+        .span-6,
+        .span-7,
+        .span-8 {
+          grid-column: span 12;
+        }
+
+        .diff {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <div class="brand">
+          <div class="mark">C</div>
+          <div>
+            <h1>CoSTAR Intelligence</h1>
+            <span>ATS + evidence engine</span>
+          </div>
+        </div>
+
+        <nav aria-label="Primary">
+          <button class="nav-button active" data-view="upload">
+            <span class="nav-icon">↑</span> Upload & Parse
+          </button>
+          <button class="nav-button" data-view="dashboard">
+            <span class="nav-icon">◫</span> ATS Dashboard
+          </button>
+          <button class="nav-button" data-view="match">
+            <span class="nav-icon">≋</span> Semantic Match
+          </button>
+          <button class="nav-button" data-view="diff">
+            <span class="nav-icon">⇄</span> Evidence Diff
+          </button>
+          <button class="nav-button" data-view="versions">
+            <span class="nav-icon">▤</span> Versions
+          </button>
+          <button class="nav-button" data-view="career-ops">
+            <span class="nav-icon">◎</span> Career Ops
+          </button>
+        </nav>
+
+        <div class="mcp-stack">
+          <h2>MCP workflow layer</h2>
+          <div class="mcp-chip"><span>Filesystem MCP</span><span class="dot"></span></div>
+          <div class="mcp-chip"><span>Vector DB MCP</span><span class="dot"></span></div>
+          <div class="mcp-chip"><span>AI Gateway MCP</span><span class="dot"></span></div>
+          <div class="mcp-chip"><span>Playwright MCP</span><span class="dot"></span></div>
+          <p class="small muted">
+            Static prototype models the contracts locally. Connectors can be
+            swapped behind the same pipeline.
+          </p>
+        </div>
+      </aside>
+
+      <main>
+        <header>
+          <div>
+            <h2 id="view-title">Upload & Parse</h2>
+            <p id="view-subtitle">Drop a resume, extract structure, and create evidence chunks.</p>
+          </div>
+          <div class="toolbar">
+            <button class="button" id="load-sample">Load sample</button>
+            <button class="button" id="export-json">Export JSON</button>
+            <button class="button primary" id="run-pipeline">Run intelligence</button>
+          </div>
+        </header>
+
+        <div class="content">
+          <section id="upload" class="view active">
+            <div class="grid">
+              <div class="panel span-7">
+                <div class="section-title">
+                  <h3>Resume Upload</h3>
+                  <div class="progress" id="parse-progress">
+                    <span class="spinner"></span>
+                    <span>Parsing resume locally</span>
+                  </div>
+                </div>
+                <div class="dropzone" id="dropzone">
+                  <div>
+                    <strong>Drop PDF, DOCX, or TXT resume</strong>
+                    <p>Original files stay in this browser session. Parsed versions are saved to localStorage.</p>
+                    <button class="button primary" id="choose-file">Choose file</button>
+                    <input id="file-input" class="hidden" type="file" accept=".pdf,.docx,.txt,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel span-5">
+                <div class="section-title">
+                  <h3>Parsing Preview</h3>
+                  <span class="tag" id="file-pill">No file</span>
+                </div>
+                <div class="preview" id="resume-preview">Upload a resume or load the sample to begin.</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="panel span-4">
+                <div class="section-title"><h3>Extracted Skills</h3></div>
+                <div class="tags" id="skills-list"></div>
+              </div>
+              <div class="panel span-4">
+                <div class="section-title"><h3>Detected Sections</h3></div>
+                <div class="tags" id="sections-list"></div>
+              </div>
+              <div class="panel span-4">
+                <div class="section-title"><h3>Evidence Chunks</h3></div>
+                <div class="tags" id="chunks-summary"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="dashboard" class="view">
+            <div class="grid">
+              <div class="panel span-3 kpi">
+                <label>ATS score</label>
+                <strong id="ats-score">0</strong>
+                <div class="meter" style="--value: 0%" id="ats-meter"><span></span></div>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Readability</label>
+                <strong id="readability-score">0</strong>
+                <div class="meter" style="--value: 0%" id="readability-meter"><span></span></div>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Keyword alignment</label>
+                <strong id="keyword-score">0</strong>
+                <div class="meter" style="--value: 0%" id="keyword-meter"><span></span></div>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Evidence safety</label>
+                <strong id="evidence-score">0</strong>
+                <div class="meter" style="--value: 0%" id="evidence-meter"><span></span></div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="panel span-6">
+                <div class="section-title"><h3>ATS Issues</h3></div>
+                <div class="issue-list" id="issues-list"></div>
+              </div>
+              <div class="panel span-6">
+                <div class="section-title"><h3>Keyword Heatmap</h3></div>
+                <div class="tags" id="keyword-heatmap"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="match" class="view">
+            <div class="grid">
+              <div class="panel span-5">
+                <div class="input-row">
+                  <label for="job-description">Target job description</label>
+                  <textarea id="job-description" placeholder="Paste a target job description here..."></textarea>
+                </div>
+                <div style="height: 12px"></div>
+                <button class="button primary" id="score-job">Score match</button>
+              </div>
+              <div class="panel span-7">
+                <div class="section-title"><h3>Role Compatibility</h3></div>
+                <div class="grid">
+                  <div class="panel span-4 kpi">
+                    <label>Fit score</label>
+                    <strong id="fit-score">0</strong>
+                  </div>
+                  <div class="panel span-4 kpi">
+                    <label>Exact skills</label>
+                    <strong id="exact-count">0</strong>
+                  </div>
+                  <div class="panel span-4 kpi">
+                    <label>Transferable</label>
+                    <strong id="transfer-count">0</strong>
+                  </div>
+                </div>
+                <div class="section-title"><h3>Gap Analysis</h3></div>
+                <div class="tags" id="gap-tags"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="diff" class="view">
+            <div class="panel">
+              <div class="section-title">
+                <h3>Evidence-Based Resume Rewrite</h3>
+                <span class="small muted">Every generated line references a source chunk.</span>
+              </div>
+              <div class="diff-list" id="diff-list"></div>
+            </div>
+          </section>
+
+          <section id="versions" class="view">
+            <div class="panel">
+              <div class="section-title">
+                <h3>Resume Versions</h3>
+                <button class="button" id="clear-versions">Clear versions</button>
+              </div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>ATS</th>
+                    <th>Skills</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="versions-table"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="career-ops" class="view">
+            <div class="grid">
+              <div class="panel span-3 kpi">
+                <label>Imported jobs</label>
+                <strong id="ops-imported">0</strong>
+                <span class="small muted">Local pipeline items</span>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Ready to tailor</label>
+                <strong id="ops-ready">0</strong>
+                <span class="small muted">Evidence can move next</span>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Waiting approval</label>
+                <strong id="ops-approvals">0</strong>
+                <span class="small muted">Human checkpoint held</span>
+              </div>
+              <div class="panel span-3 kpi">
+                <label>Failed workflows</label>
+                <strong id="ops-failed">0</strong>
+                <span class="small muted">Retryable operations</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="section-title">
+                <div>
+                  <h3>Career Agents</h3>
+                  <span class="small muted">Prototype activity backed by local workflow state.</span>
+                </div>
+                <a
+                  class="button primary"
+                  href="http://127.0.0.1:4317"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open live Career-Ops dashboard
+                </a>
+              </div>
+              <div class="agent-strip" id="ops-agents"></div>
+            </div>
+
+            <div class="grid">
+              <div class="panel span-8">
+                <div class="section-title">
+                  <div>
+                    <h3>Application Pipeline</h3>
+                    <span class="small muted">Preparation only. Submission stays with the candidate.</span>
+                  </div>
+                  <div class="ops-controls">
+                    <label for="ops-stage-filter">Stage</label>
+                    <select id="ops-stage-filter">
+                      <option value="all">All</option>
+                      <option value="Imported">Imported</option>
+                      <option value="Ready to tailor">Ready to tailor</option>
+                      <option value="Prepared">Prepared</option>
+                      <option value="Waiting approval">Waiting approval</option>
+                      <option value="Preparation approved">Preparation approved</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="ops-table-wrap">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Opportunity</th>
+                        <th>Fit</th>
+                        <th>Readiness</th>
+                        <th>Stage</th>
+                        <th>Next action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ops-jobs"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="panel span-4">
+                <div class="section-title">
+                  <div>
+                    <h3>Approval Checkpoints</h3>
+                    <span class="small muted">Prepared assets stop here.</span>
+                  </div>
+                </div>
+                <div class="ops-list" id="ops-checkpoints"></div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="panel span-7">
+                <div class="section-title">
+                  <div>
+                    <h3>Workflow Operations</h3>
+                    <span class="small muted">Queue, batch, retry, and checkpoint placeholders.</span>
+                  </div>
+                </div>
+                <div class="ops-list" id="ops-workflows"></div>
+              </div>
+
+              <div class="panel span-5">
+                <div class="section-title">
+                  <div>
+                    <h3>Current Resume Signal</h3>
+                    <span class="small muted">Existing ATS and match outputs feed the operator view.</span>
+                  </div>
+                </div>
+                <div class="ops-list" id="ops-signal"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script>
+      const state = {
+        fileName: "",
+        rawText: "",
+        parsed: emptyParsed(),
+        analysis: emptyAnalysis(),
+        match: { fit: 0, exact: [], transferable: [], gaps: [] },
+        rewrites: [],
+        careerOps: createCareerOpsState(),
+      };
+
+      const knownSkills = [
+        "javascript", "typescript", "react", "next.js", "node.js", "python",
+        "java", "sql", "sqlite", "postgresql", "prisma", "tailwind", "aws",
+        "docker", "kubernetes", "git", "ci/cd", "rest", "graphql", "langchain",
+        "langgraph", "ollama", "openai", "mcp", "vector", "embeddings",
+        "supabase", "playwright", "tesseract", "pdf", "docx", "machine learning",
+        "data analysis", "product", "leadership", "automation", "testing",
+        "api", "microservices", "security", "analytics", "etl", "rag"
+      ];
+
+      const actionVerbs = [
+        "built", "led", "launched", "improved", "reduced", "increased",
+        "designed", "implemented", "automated", "optimized", "migrated",
+        "delivered", "created", "owned", "integrated", "analyzed"
+      ];
+
+      const sectionPatterns = {
+        summary: /^(summary|profile|objective)\b/i,
+        skills: /^(skills|technical skills|technologies)\b/i,
+        experience: /^(experience|work experience|employment|professional experience)\b/i,
+        projects: /^(projects|selected projects)\b/i,
+        education: /^(education|academic)\b/i,
+        certifications: /^(certifications|certificates)\b/i,
+      };
+
+      const sampleResume = `Arvind Rao
+Software Engineer
+arvind@example.com | Bengaluru | github.com/arvind
+
+SUMMARY
+Full-stack engineer building local-first automation tools and AI workflows.
+
+SKILLS
+TypeScript, React, Next.js, Node.js, Prisma, SQLite, Tailwind, Playwright, Ollama, LangChain, REST APIs, Docker
+
+EXPERIENCE
+Software Engineer, CareerOps Lab
+- Built a local-first job tracking system with Prisma, SQLite, import pipelines, audit logs, and ATS-friendly PDF generation.
+- Implemented resume tailoring workflows using Ollama-compatible provider routing and structured scoring prompts.
+- Automated manual-assist application tracking and reduced duplicate job review time by 35%.
+
+PROJECTS
+AI Resume Optimizer
+- Designed semantic resume chunks for skills, experience, projects, and measurable achievements.
+- Created recruiter-style scoring for keyword alignment, readability, formatting clarity, and evidence-backed rewriting.
+
+EDUCATION
+B.Tech Computer Science, 2021
+
+CERTIFICATIONS
+AWS Cloud Practitioner`;
+
+      const sampleJob = `We are hiring a Full Stack AI Engineer to build ATS intelligence workflows. Required skills include TypeScript, React, Next.js, Node.js, Prisma, SQLite, Playwright, LangChain, vector search, embeddings, Ollama, PDF parsing, automation, and recruiter-facing analytics. The role requires strong product judgment, measurable impact, API design, and local-first architecture experience.`;
+
+      const titles = {
+        upload: ["Upload & Parse", "Drop a resume, extract structure, and create evidence chunks."],
+        dashboard: ["ATS Dashboard", "Score compatibility, formatting, recruiter readability, and keyword coverage."],
+        match: ["Semantic Match", "Compare resume evidence against a target role or job description."],
+        diff: ["Evidence Diff", "Rewrite bullets only when source evidence supports the claim."],
+        versions: ["Versions", "Track resume analyses and tailored outputs in local storage."],
+        "career-ops": ["Career Ops", "Operate job preparation workflows with explicit human checkpoints."],
+      };
+
+      function createCareerOpsState() {
+        return {
+          stageFilter: "all",
+          jobs: [
+            {
+              id: "job-aurora",
+              company: "Aurora Systems",
+              role: "Full Stack AI Engineer",
+              fit: 82,
+              ats: 78,
+              recruiter: 86,
+              stage: "Ready to tailor",
+              next: "Tailor resume",
+            },
+            {
+              id: "job-northstar",
+              company: "Northstar Health",
+              role: "Automation Platform Engineer",
+              fit: 74,
+              ats: 71,
+              recruiter: 79,
+              stage: "Prepared",
+              next: "Hold for review",
+            },
+            {
+              id: "job-lattice",
+              company: "Lattice Works",
+              role: "Product Engineer, Career AI",
+              fit: 68,
+              ats: 64,
+              recruiter: 73,
+              stage: "Imported",
+              next: "Run fit analysis",
+            },
+            {
+              id: "job-signal",
+              company: "Signal Forge",
+              role: "AI Workflow Engineer",
+              fit: 88,
+              ats: 83,
+              recruiter: 90,
+              stage: "Waiting approval",
+              next: "Review prepared assets",
+            },
+          ],
+          workflows: [
+            {
+              id: "workflow-batch",
+              name: "Batch ATS analysis",
+              status: "Running",
+              steps: "3 of 4 jobs scored",
+              retry: 0,
+            },
+            {
+              id: "workflow-rewrite",
+              name: "Evidence rewrite",
+              status: "Failed",
+              steps: "Humanizer step needs retry",
+              retry: 1,
+            },
+            {
+              id: "workflow-recruiter",
+              name: "Recruiter simulation",
+              status: "Queued",
+              steps: "Waiting for rewrite diff",
+              retry: 0,
+            },
+            {
+              id: "workflow-checkpoint",
+              name: "Application checkpoint",
+              status: "Completed",
+              steps: "Assets staged for review",
+              retry: 0,
+            },
+          ],
+          checkpoints: [
+            {
+              id: "checkpoint-signal",
+              jobId: "job-signal",
+              title: "Signal Forge packet",
+              note: "Tailored resume and recruiter note are ready for a human read-through.",
+              status: "Waiting approval",
+            },
+          ],
+          agents: [
+            { name: "Discovery", status: "Queued", detail: "1 imported role awaits fit analysis." },
+            { name: "ATS", status: "Running", detail: "Scoring job evidence and keyword coverage." },
+            { name: "Rewrite", status: "Retry", detail: "One humanizer step is recoverable." },
+            { name: "Recruiter", status: "Queued", detail: "Confidence simulation waits on diff." },
+            { name: "Supervisor", status: "Ready", detail: "Approval gates remain candidate-owned." },
+          ],
+        };
+      }
+
+      function emptyParsed() {
+        return { contact: {}, sections: {}, skills: [], chunks: [] };
+      }
+
+      function emptyAnalysis() {
+        return {
+          ats: 0,
+          readability: 0,
+          keywords: 0,
+          evidence: 0,
+          issues: [],
+          heatmap: [],
+        };
+      }
+
+      function toast(message) {
+        const el = document.querySelector("#toast");
+        el.textContent = message;
+        el.classList.add("active");
+        window.clearTimeout(toast.timer);
+        toast.timer = window.setTimeout(() => el.classList.remove("active"), 2800);
+      }
+
+      function normalize(text) {
+        return text
+          .replace(/\r/g, "")
+          .replace(/[•●▪]/g, "-")
+          .replace(/[ \t]+/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+
+      async function readFile(file) {
+        const extension = file.name.split(".").pop().toLowerCase();
+        if (extension === "txt") return file.text();
+        if (extension === "pdf") return readPdf(file);
+        if (extension === "docx") return readDocx(file);
+        throw new Error("Unsupported file type. Use PDF, DOCX, or TXT.");
+      }
+
+      async function readPdf(file) {
+        if (!window.pdfjsLib) throw new Error("PDF parser could not load.");
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        const data = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
+        const pages = [];
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+          const page = await pdf.getPage(pageNumber);
+          const content = await page.getTextContent();
+          pages.push(content.items.map((item) => item.str).join(" "));
+        }
+        return pages.join("\n\n");
+      }
+
+      async function readDocx(file) {
+        if (!window.mammoth) throw new Error("DOCX parser could not load.");
+        const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+        return result.value;
+      }
+
+      function parseResume(text) {
+        const clean = normalize(text);
+        const lines = clean.split("\n").map((line) => line.trim()).filter(Boolean);
+        const sections = {};
+        let current = "header";
+        sections[current] = [];
+
+        for (const line of lines) {
+          const key = Object.entries(sectionPatterns).find(([, pattern]) => pattern.test(line));
+          if (key) {
+            current = key[0];
+            sections[current] = sections[current] || [];
+          } else {
+            sections[current].push(line);
+          }
+        }
+
+        const lower = clean.toLowerCase();
+        const skills = knownSkills
+          .filter((skill) => lower.includes(skill))
+          .map((skill) => skill.replace(/\b\w/g, (char) => char.toUpperCase()));
+
+        const chunks = [];
+        Object.entries(sections).forEach(([type, values]) => {
+          if (type === "header") return;
+          values.forEach((content, index) => {
+            const isBullet = content.startsWith("-");
+            const startsWithAction = actionVerbs.some((verb) => content.toLowerCase().replace(/^- /, "").startsWith(verb));
+            const useful = type === "summary" || isBullet || startsWithAction;
+            if (!useful) return;
+            chunks.push({
+              id: `chunk-${chunks.length + 1}`,
+              type,
+              content: content.replace(/^- /, ""),
+              isBullet,
+              keywords: knownSkills.filter((skill) => content.toLowerCase().includes(skill)),
+              index,
+            });
+          });
+        });
+
+        return {
+          contact: {
+            name: lines[0] || "Unknown candidate",
+            email: clean.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || "",
+            phone: clean.match(/(?:\+?\d[\d\s().-]{8,}\d)/)?.[0] || "",
+          },
+          sections,
+          skills: [...new Set(skills)],
+          chunks,
+        };
+      }
+
+      function analyzeResume(parsed, jobDescription = "") {
+        const text = state.rawText.toLowerCase();
+        const bullets = parsed.chunks.filter((chunk) => chunk.isBullet);
+        const quantified = parsed.chunks.filter((chunk) => /\d+%?|\$|x\b/i.test(chunk.content));
+        const verbs = actionVerbs.filter((verb) => text.includes(verb));
+        const sectionCount = Object.values(parsed.sections).filter((items) => items.length).length;
+        const jdWords = extractKeywords(jobDescription || sampleJob);
+        const resumeWords = new Set(extractKeywords(state.rawText));
+        const covered = jdWords.filter((word) => resumeWords.has(word));
+        const heatmap = jdWords.slice(0, 36).map((word) => ({
+          word,
+          status: resumeWords.has(word) ? "good" : parsed.skills.some((skill) => related(skill, word)) ? "warn" : "bad",
+        }));
+
+        const formatting = Math.min(100, sectionCount * 15 + (parsed.contact.email ? 15 : 0) + 25);
+        const impact = Math.min(100, Math.round((quantified.length / Math.max(1, parsed.chunks.length)) * 180));
+        const readability = Math.min(100, 45 + verbs.length * 5 + Math.min(25, sectionCount * 4));
+        const keywords = jdWords.length ? Math.round((covered.length / jdWords.length) * 100) : Math.min(100, parsed.skills.length * 8);
+        const evidence = parsed.chunks.length ? 96 : 0;
+        const ats = Math.round(formatting * 0.25 + readability * 0.25 + keywords * 0.3 + impact * 0.2);
+
+        const issues = [];
+        if (!parsed.contact.email) issues.push(["Contact", "Missing email address. Add a plain text email for ATS parsing."]);
+        if (!parsed.sections.skills?.length) issues.push(["Skills", "Skills section was not detected. Add a compact keyword-rich skills section."]);
+        if (!parsed.sections.experience?.length) issues.push(["Experience", "Experience section is weak or missing. ATS systems expect dated role evidence."]);
+        if (quantified.length < 2) issues.push(["Impact", "Few measurable achievements detected. Add metrics where they are truthful."]);
+        if (verbs.length < 5) issues.push(["Phrasing", "Use stronger action verbs at the start of bullets."]);
+        if (state.rawText.length > 0 && state.rawText.length < 1200) issues.push(["Depth", "Resume text appears short. Add project and scope evidence for recruiter confidence."]);
+        if (!issues.length) issues.push(["Ready", "No major ATS blockers detected. Focus on job-specific keyword tuning."]);
+
+        return { ats, readability, keywords, evidence, issues, heatmap };
+      }
+
+      function extractKeywords(text) {
+        const stop = new Set("the,and,for,with,that,this,from,are,our,you,will,can,has,have,into,role,work,team,strong,using,include,includes,required".split(","));
+        const words = normalize(text)
+          .toLowerCase()
+          .match(/[a-z][a-z.+#/-]{2,}/g) || [];
+        const preferred = words.filter((word) => !stop.has(word));
+        return [...new Set(preferred)].slice(0, 80);
+      }
+
+      function related(skill, word) {
+        const lower = skill.toLowerCase();
+        const groups = [
+          ["react", "frontend", "ui", "component"],
+          ["node.js", "api", "backend", "server"],
+          ["prisma", "sqlite", "postgresql", "database", "db"],
+          ["ollama", "openai", "ai", "llm", "model"],
+          ["langchain", "langgraph", "workflow", "agent"],
+          ["vector", "embeddings", "semantic", "retrieval"],
+          ["playwright", "browser", "automation", "testing"],
+        ];
+        return groups.some((group) => group.includes(word) && group.some((item) => lower.includes(item)));
+      }
+
+      function scoreJob() {
+        const jd = document.querySelector("#job-description").value || sampleJob;
+        const jdKeywords = extractKeywords(jd);
+        const resumeKeywords = new Set(extractKeywords(state.rawText));
+        const exact = jdKeywords.filter((word) => resumeKeywords.has(word));
+        const transferable = jdKeywords.filter((word) => !resumeKeywords.has(word) && state.parsed.skills.some((skill) => related(skill, word)));
+        const gaps = jdKeywords.filter((word) => !exact.includes(word) && !transferable.includes(word)).slice(0, 20);
+        const fit = Math.min(100, Math.round((exact.length * 1.8 + transferable.length) / Math.max(1, jdKeywords.length) * 100));
+        state.match = { fit, exact, transferable, gaps };
+        state.analysis = analyzeResume(state.parsed, jd);
+        state.rewrites = buildRewrites(state.parsed, state.match);
+        saveVersion();
+        render();
+        toast("Semantic match scored.");
+      }
+
+      function buildRewrites(parsed, match) {
+        const targetTerms = [...match.exact, ...match.transferable].slice(0, 8);
+        return parsed.chunks
+          .filter((chunk) => chunk.type === "summary" || chunk.isBullet)
+          .slice(0, 8)
+          .map((chunk) => {
+            const hasMetric = /\d+%?|\$|x\b/i.test(chunk.content);
+            const term = targetTerms.find((keyword) => !chunk.content.toLowerCase().includes(keyword));
+            const prefix = actionVerbs.some((verb) => chunk.content.toLowerCase().startsWith(verb))
+              ? ""
+              : "Delivered ";
+            const optimized = `${prefix}${chunk.content.replace(/\.$/, "")}${term ? `, emphasizing ${term}` : ""}${hasMetric ? "" : " while preserving the original scope and evidence"}.`;
+            return {
+              original: chunk.content,
+              optimized,
+              source: chunk.id,
+              sourceText: chunk.content,
+              impact: term ? "+ keyword alignment" : "+ recruiter clarity",
+            };
+          });
+      }
+
+      async function processText(text, fileName = "Sample resume") {
+        state.fileName = fileName;
+        state.rawText = normalize(text);
+        state.parsed = parseResume(state.rawText);
+        state.analysis = analyzeResume(state.parsed, document.querySelector("#job-description").value || sampleJob);
+        state.match = { fit: 0, exact: [], transferable: [], gaps: [] };
+        state.rewrites = buildRewrites(state.parsed, state.match);
+        saveVersion();
+        render();
+      }
+
+      async function handleFile(file) {
+        document.querySelector("#parse-progress").classList.add("active");
+        try {
+          const text = await readFile(file);
+          await processText(text, file.name);
+          toast("Resume parsed and analyzed locally.");
+        } catch (error) {
+          toast(error.message);
+        } finally {
+          document.querySelector("#parse-progress").classList.remove("active");
+        }
+      }
+
+      function saveVersion() {
+        if (!state.rawText) return;
+        const versions = JSON.parse(localStorage.getItem("costar.resumeVersions") || "[]");
+        const version = {
+          id: Date.now(),
+          name: state.parsed.contact.name || state.fileName,
+          fileName: state.fileName,
+          createdAt: new Date().toISOString(),
+          ats: state.analysis.ats,
+          skills: state.parsed.skills,
+          chunks: state.parsed.chunks.length,
+          analysis: state.analysis,
+          rewrites: state.rewrites,
+        };
+        localStorage.setItem("costar.resumeVersions", JSON.stringify([version, ...versions].slice(0, 12)));
+      }
+
+      function render() {
+        document.querySelector("#file-pill").textContent = state.fileName || "No file";
+        document.querySelector("#resume-preview").textContent = state.rawText || "Upload a resume or load the sample to begin.";
+        renderTags("#skills-list", state.parsed.skills, "good", "No skills detected yet.");
+        renderTags("#sections-list", Object.keys(state.parsed.sections).filter((key) => state.parsed.sections[key].length), "tag", "No sections detected yet.");
+        renderTags("#chunks-summary", summarizeChunks(), "warn", "No chunks yet.");
+        setScore("ats", state.analysis.ats);
+        setScore("readability", state.analysis.readability);
+        setScore("keyword", state.analysis.keywords);
+        setScore("evidence", state.analysis.evidence);
+        renderIssues();
+        renderHeatmap();
+        renderMatch();
+        renderDiff();
+        renderVersions();
+        renderCareerOps();
+      }
+
+      function summarizeChunks() {
+        const counts = state.parsed.chunks.reduce((acc, chunk) => {
+          acc[chunk.type] = (acc[chunk.type] || 0) + 1;
+          return acc;
+        }, {});
+        return Object.entries(counts).map(([key, value]) => `${key}: ${value}`);
+      }
+
+      function renderTags(selector, items, tone, empty) {
+        const el = document.querySelector(selector);
+        el.innerHTML = "";
+        if (!items.length) {
+          el.innerHTML = `<span class="muted small">${empty}</span>`;
+          return;
+        }
+        items.forEach((item) => {
+          const span = document.createElement("span");
+          span.className = tone === "tag" ? "tag" : `tag ${tone}`;
+          span.textContent = item;
+          el.appendChild(span);
+        });
+      }
+
+      function setScore(name, value) {
+        document.querySelector(`#${name}-score`).textContent = value;
+        document.querySelector(`#${name}-meter`).style.setProperty("--value", `${value}%`);
+      }
+
+      function renderIssues() {
+        const el = document.querySelector("#issues-list");
+        el.innerHTML = "";
+        state.analysis.issues.forEach(([label, text]) => {
+          const issue = document.createElement("div");
+          issue.className = "issue";
+          issue.innerHTML = `<b>${label}</b><span>${text}</span>`;
+          el.appendChild(issue);
+        });
+      }
+
+      function renderHeatmap() {
+        const el = document.querySelector("#keyword-heatmap");
+        el.innerHTML = "";
+        if (!state.analysis.heatmap.length) {
+          el.innerHTML = `<span class="muted small">Paste a job description or run the sample pipeline.</span>`;
+          return;
+        }
+        state.analysis.heatmap.forEach((item) => {
+          const tag = document.createElement("span");
+          tag.className = `tag ${item.status}`;
+          tag.textContent = item.word;
+          el.appendChild(tag);
+        });
+      }
+
+      function renderMatch() {
+        document.querySelector("#fit-score").textContent = state.match.fit;
+        document.querySelector("#exact-count").textContent = state.match.exact.length;
+        document.querySelector("#transfer-count").textContent = state.match.transferable.length;
+        const gaps = [
+          ...state.match.exact.slice(0, 8).map((word) => ({ word, status: "good" })),
+          ...state.match.transferable.slice(0, 8).map((word) => ({ word, status: "warn" })),
+          ...state.match.gaps.slice(0, 12).map((word) => ({ word, status: "bad" })),
+        ];
+        const el = document.querySelector("#gap-tags");
+        el.innerHTML = "";
+        if (!gaps.length) {
+          el.innerHTML = `<span class="muted small">Score a job description to see exact matches, transferable skills, and gaps.</span>`;
+          return;
+        }
+        gaps.forEach((item) => {
+          const tag = document.createElement("span");
+          tag.className = `tag ${item.status}`;
+          tag.textContent = item.word;
+          el.appendChild(tag);
+        });
+      }
+
+      function renderDiff() {
+        const el = document.querySelector("#diff-list");
+        el.innerHTML = "";
+        if (!state.rewrites.length) {
+          el.innerHTML = `<span class="muted small">Upload or load a resume to generate evidence-backed rewrites.</span>`;
+          return;
+        }
+        state.rewrites.forEach((rewrite) => {
+          const row = document.createElement("div");
+          row.className = "diff";
+          row.innerHTML = `
+            <div class="diff-box"><strong>Original</strong>${escapeHtml(rewrite.original)}</div>
+            <div class="diff-box"><strong>Optimized</strong>${escapeHtml(rewrite.optimized)}</div>
+            <div class="evidence"><b>${rewrite.impact}</b><br>Source: ${rewrite.source}<br>${escapeHtml(rewrite.sourceText)}</div>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderVersions() {
+        const versions = JSON.parse(localStorage.getItem("costar.resumeVersions") || "[]");
+        const el = document.querySelector("#versions-table");
+        el.innerHTML = "";
+        if (!versions.length) {
+          el.innerHTML = `<tr><td colspan="5" class="muted">No resume versions saved yet.</td></tr>`;
+          return;
+        }
+        versions.forEach((version) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${escapeHtml(version.name)}</td>
+            <td>${new Date(version.createdAt).toLocaleString()}</td>
+            <td>${version.ats}</td>
+            <td>${version.skills.slice(0, 8).map(escapeHtml).join(", ")}</td>
+            <td>${escapeHtml(version.fileName)} · ${version.chunks} chunks</td>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderCareerOps() {
+        const ops = state.careerOps;
+        document.querySelector("#ops-imported").textContent = ops.jobs.length;
+        document.querySelector("#ops-ready").textContent =
+          ops.jobs.filter((job) => job.stage === "Ready to tailor").length;
+        document.querySelector("#ops-approvals").textContent =
+          ops.checkpoints.filter((checkpoint) => checkpoint.status === "Waiting approval").length;
+        document.querySelector("#ops-failed").textContent =
+          ops.workflows.filter((workflow) => workflow.status === "Failed").length;
+        document.querySelector("#ops-stage-filter").value = ops.stageFilter;
+        renderOpsAgents();
+        renderOpsJobs();
+        renderOpsCheckpoints();
+        renderOpsWorkflows();
+        renderOpsSignal();
+      }
+
+      function renderOpsAgents() {
+        const el = document.querySelector("#ops-agents");
+        el.innerHTML = "";
+        state.careerOps.agents.forEach((agent) => {
+          const row = document.createElement("article");
+          row.className = "agent";
+          row.innerHTML = `
+            <div class="ops-status">
+              <b>${escapeHtml(agent.name)}</b>
+              ${statusTag(agent.status)}
+            </div>
+            <p class="small">${escapeHtml(agent.detail)}</p>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderOpsJobs() {
+        const el = document.querySelector("#ops-jobs");
+        const jobs = state.careerOps.jobs.filter((job) =>
+          state.careerOps.stageFilter === "all" || job.stage === state.careerOps.stageFilter
+        );
+        el.innerHTML = "";
+        if (!jobs.length) {
+          el.innerHTML = `<tr><td colspan="5" class="muted">No preparation jobs match this stage.</td></tr>`;
+          return;
+        }
+        jobs.forEach((job) => {
+          const row = document.createElement("tr");
+          const canPrepare = job.stage === "Prepared";
+          row.innerHTML = `
+            <td><b>${escapeHtml(job.company)}</b><br><span class="muted">${escapeHtml(job.role)}</span></td>
+            <td>${jobFitScore(job)}</td>
+            <td>${readinessScore(job)}</td>
+            <td>${statusTag(job.stage)}</td>
+            <td>
+              <div class="ops-actions">
+                <span>${escapeHtml(job.next)}</span>
+                ${canPrepare ? `<button class="button" data-prepare-job="${escapeHtml(job.id)}">Request approval</button>` : ""}
+              </div>
+            </td>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderOpsCheckpoints() {
+        const el = document.querySelector("#ops-checkpoints");
+        el.innerHTML = "";
+        if (!state.careerOps.checkpoints.length) {
+          el.innerHTML = `<span class="muted small">Prepared applications appear here before any manual submission.</span>`;
+          return;
+        }
+        state.careerOps.checkpoints.forEach((checkpoint) => {
+          const row = document.createElement("article");
+          row.className = "checkpoint";
+          row.innerHTML = `
+            <header>
+              <div>
+                <h4>${escapeHtml(checkpoint.title)}</h4>
+                <p class="small">${escapeHtml(checkpoint.note)}</p>
+              </div>
+              ${statusTag(checkpoint.status)}
+            </header>
+            <div class="ops-actions">
+              ${checkpoint.status === "Waiting approval"
+                ? `<button class="button primary" data-approve-checkpoint="${escapeHtml(checkpoint.id)}">Approve preparation</button>`
+                : `<span class="small muted">Approved for manual candidate action.</span>`}
+            </div>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderOpsWorkflows() {
+        const el = document.querySelector("#ops-workflows");
+        el.innerHTML = "";
+        state.careerOps.workflows.forEach((workflow) => {
+          const row = document.createElement("article");
+          row.className = "ops-row";
+          row.innerHTML = `
+            <header>
+              <div>
+                <h4>${escapeHtml(workflow.name)}</h4>
+                <p class="small">${escapeHtml(workflow.steps)}</p>
+              </div>
+              ${statusTag(workflow.status)}
+            </header>
+            <div class="ops-actions">
+              <span class="small muted">Retries: ${workflow.retry}</span>
+              ${workflow.status === "Failed"
+                ? `<button class="button" data-retry-workflow="${escapeHtml(workflow.id)}">Retry</button>`
+                : ""}
+            </div>
+          `;
+          el.appendChild(row);
+        });
+      }
+
+      function renderOpsSignal() {
+        const el = document.querySelector("#ops-signal");
+        const hasResume = Boolean(state.rawText);
+        const resumeSignal = hasResume
+          ? `${state.parsed.contact.name || "Parsed resume"} exposes ${state.parsed.chunks.length} evidence chunks.`
+          : "Load a resume to replace sample readiness with live ATS evidence.";
+        const fitSignal = state.match.fit
+          ? `Latest semantic match fit is ${state.match.fit} with ${state.match.exact.length} exact skill matches.`
+          : "Score a job description to feed fit context into this command center.";
+        el.innerHTML = `
+          <article class="ops-row">
+            <div class="ops-score">
+              <span>ATS readiness</span>
+              <b>${hasResume ? state.analysis.ats : "--"}</b>
+            </div>
+            <p>${escapeHtml(resumeSignal)}</p>
+          </article>
+          <article class="ops-row">
+            <div class="ops-score">
+              <span>Role fit</span>
+              <b>${state.match.fit || "--"}</b>
+            </div>
+            <p>${escapeHtml(fitSignal)}</p>
+          </article>
+          <article class="ops-row">
+            <div class="ops-status">
+              ${statusTag("Human checkpoint")}
+              <p class="small">No operator action here submits an application.</p>
+            </div>
+          </article>
+        `;
+      }
+
+      function jobFitScore(job) {
+        const live = state.match.fit && job.id === "job-aurora";
+        return `<div class="ops-score"><b>${live ? state.match.fit : job.fit}</b><span>${live ? "Live match" : "Sample fit"}</span></div>`;
+      }
+
+      function readinessScore(job) {
+        const live = state.rawText && job.id === "job-aurora";
+        return `
+          <div class="ops-score">
+            <b>${live ? state.analysis.ats : job.ats}</b>
+            <span>ATS · recruiter ${job.recruiter}</span>
+          </div>
+        `;
+      }
+
+      function statusTag(status) {
+        const safe = escapeHtml(status);
+        const tone = /failed|retry/i.test(status)
+          ? "bad"
+          : /waiting|queued|checkpoint|imported/i.test(status)
+            ? "warn"
+            : "good";
+        return `<span class="tag ${tone}">${safe}</span>`;
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[char]);
+      }
+
+      document.querySelectorAll(".nav-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const view = button.dataset.view;
+          document.querySelectorAll(".nav-button").forEach((item) => item.classList.toggle("active", item === button));
+          document.querySelectorAll(".view").forEach((item) => item.classList.toggle("active", item.id === view));
+          document.querySelector("#view-title").textContent = titles[view][0];
+          document.querySelector("#view-subtitle").textContent = titles[view][1];
+        });
+      });
+
+      const dropzone = document.querySelector("#dropzone");
+      const fileInput = document.querySelector("#file-input");
+      document.querySelector("#choose-file").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (event) => event.target.files[0] && handleFile(event.target.files[0]));
+      ["dragenter", "dragover"].forEach((name) => {
+        dropzone.addEventListener(name, (event) => {
+          event.preventDefault();
+          dropzone.classList.add("dragging");
+        });
+      });
+      ["dragleave", "drop"].forEach((name) => {
+        dropzone.addEventListener(name, (event) => {
+          event.preventDefault();
+          dropzone.classList.remove("dragging");
+        });
+      });
+      dropzone.addEventListener("drop", (event) => {
+        const file = event.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
+
+      document.querySelector("#load-sample").addEventListener("click", async () => {
+        document.querySelector("#job-description").value = sampleJob;
+        await processText(sampleResume, "sample-resume.txt");
+        scoreJob();
+        toast("Sample resume and job loaded.");
+      });
+
+      document.querySelector("#run-pipeline").addEventListener("click", async () => {
+        if (!state.rawText) await processText(sampleResume, "sample-resume.txt");
+        scoreJob();
+      });
+
+      document.querySelector("#score-job").addEventListener("click", scoreJob);
+      document.querySelector("#ops-stage-filter").addEventListener("change", (event) => {
+        state.careerOps.stageFilter = event.target.value;
+        renderOpsJobs();
+      });
+      document.querySelector("#career-ops").addEventListener("click", (event) => {
+        const retryId = event.target.dataset.retryWorkflow;
+        const jobId = event.target.dataset.prepareJob;
+        const checkpointId = event.target.dataset.approveCheckpoint;
+        if (retryId) retryWorkflow(retryId);
+        if (jobId) requestApproval(jobId);
+        if (checkpointId) approveCheckpoint(checkpointId);
+      });
+      document.querySelector("#clear-versions").addEventListener("click", () => {
+        localStorage.removeItem("costar.resumeVersions");
+        renderVersions();
+        toast("Version history cleared.");
+      });
+
+      function retryWorkflow(workflowId) {
+        const workflow = state.careerOps.workflows.find((item) => item.id === workflowId);
+        if (!workflow) return;
+        workflow.status = "Queued";
+        workflow.steps = "Retry queued from the last checkpoint";
+        workflow.retry += 1;
+        state.careerOps.agents.find((agent) => agent.name === "Rewrite").status = "Queued";
+        renderCareerOps();
+        toast("Workflow retry queued locally.");
+      }
+
+      function requestApproval(jobId) {
+        const job = state.careerOps.jobs.find((item) => item.id === jobId);
+        if (!job) return;
+        job.stage = "Waiting approval";
+        job.next = "Review prepared assets";
+        state.careerOps.checkpoints.unshift({
+          id: `checkpoint-${job.id}`,
+          jobId: job.id,
+          title: `${job.company} packet`,
+          note: "Resume and message prep stopped at the approval checkpoint.",
+          status: "Waiting approval",
+        });
+        renderCareerOps();
+        toast("Preparation moved to the approval checkpoint.");
+      }
+
+      function approveCheckpoint(checkpointId) {
+        const checkpoint = state.careerOps.checkpoints.find((item) => item.id === checkpointId);
+        if (!checkpoint) return;
+        checkpoint.status = "Preparation approved";
+        const job = state.careerOps.jobs.find((item) => item.id === checkpoint.jobId);
+        if (job) {
+          job.stage = "Preparation approved";
+          job.next = "Candidate reviews manual submission";
+        }
+        renderCareerOps();
+        toast("Preparation approved. Submission remains manual.");
+      }
+
+      document.querySelector("#export-json").addEventListener("click", () => {
+        const payload = {
+          fileName: state.fileName,
+          parsed: state.parsed,
+          analysis: state.analysis,
+          match: state.match,
+          rewrites: state.rewrites,
+          exportedAt: new Date().toISOString(),
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "costar-resume-intelligence.json";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      render();
+    </script>
+  </body>
+</html>
